@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<!-- dirección: memo de decisión · acento: --primary marca la opción recomendada, verde/ámbar/rojo para puntuación ·
+     elemento dominante: el veredicto · densidad: media
+     EJEMPLO DE REFERENCIA: los datos son sintéticos. Sustitúyelos siempre por datos reales. -->
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    .va {
+      --va-ok: oklch(74% 0.15 155); --va-warn: oklch(80% 0.15 75); --va-bad: oklch(70% 0.19 25);
+      --va-info: var(--primary);
+      --va-sunken: color-mix(in srgb, var(--foreground) 5%, var(--background));
+      --va-hairline: color-mix(in srgb, var(--border) 70%, transparent);
+      --va-shadow: 0 1px 2px rgb(0 0 0 / .25), 0 12px 32px -16px rgb(0 0 0 / .55);
+      --va-radius-lg: 16px; --va-radius-sm: 8px; --va-ease: cubic-bezier(.16, 1, .3, 1);
+    }
+    html.light .va {
+      --va-ok: oklch(52% 0.14 155); --va-warn: oklch(58% 0.15 65); --va-bad: oklch(53% 0.2 25);
+      --va-shadow: 0 1px 2px rgb(15 23 42 / .06), 0 12px 32px -18px rgb(15 23 42 / .25);
+    }
+    .va { font-variant-numeric: tabular-nums; -webkit-font-smoothing: antialiased; }
+    .va-label { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted-foreground); }
+    .va-title { font-size: clamp(22px, 3vw, 30px); font-weight: 650; letter-spacing: -.02em; line-height: 1.15; text-wrap: balance; }
+    .va-body { font-size: 15px; line-height: 1.6; color: var(--muted-foreground); text-wrap: pretty; }
+    .va-panel { background: var(--card); border: 1px solid var(--va-hairline); border-radius: var(--va-radius-lg); box-shadow: var(--va-shadow); }
+    .va-badge { --tone: var(--va-info); display: inline-flex; align-items: center; gap: .35em; padding: 2px 8px; border-radius: 999px;
+      font-size: 12px; font-weight: 600; color: var(--tone); background: color-mix(in oklch, var(--tone) 14%, transparent);
+      border: 1px solid color-mix(in oklch, var(--tone) 28%, transparent); }
+    .va-callout { --tone: var(--va-info); border-left: 3px solid var(--tone); background: color-mix(in oklch, var(--tone) 8%, var(--card));
+      border-radius: 0 var(--va-radius-sm) var(--va-radius-sm) 0; padding: 14px 16px; }
+
+    /* veredicto: el panel recomendado lleva un borde de acento y un halo sutil */
+    .verdict { border-color: color-mix(in oklch, var(--primary) 45%, transparent);
+      background: linear-gradient(180deg, color-mix(in oklch, var(--primary) 7%, var(--card)), var(--card) 60%); }
+    .reason { display: grid; grid-template-columns: 20px 1fr; gap: 10px; align-items: start; }
+    .reason svg { color: var(--va-ok); margin-top: 3px; }
+
+    /* matriz: la columna recomendada se tiñe para que la vista la siga hacia abajo */
+    .matrix th, .matrix td { padding: 12px 14px; text-align: left; vertical-align: top; }
+    .matrix tbody tr { border-top: 1px solid var(--va-hairline); }
+    .matrix .pick { background: color-mix(in oklch, var(--primary) 7%, transparent); }
+    .matrix thead .pick { border-radius: var(--va-radius-sm) var(--va-radius-sm) 0 0; }
+    .score { display: inline-flex; gap: 3px; vertical-align: middle; margin-right: 8px; }
+    .score i { width: 8px; height: 8px; border-radius: 2px; background: color-mix(in srgb, var(--muted-foreground) 25%, transparent); }
+    .score[data-score="3"] i { background: var(--va-ok); }
+    .score[data-score="2"] i:nth-child(-n+2) { background: var(--va-warn); }
+    .score[data-score="1"] i:first-child { background: var(--va-bad); }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .va-rise { animation: va-rise .45s var(--va-ease) both; animation-delay: calc(var(--i, 0) * 60ms); }
+      @keyframes va-rise { from { opacity: 0; transform: translateY(8px); } }
+    }
+  </style>
+</head>
+<body class="va bg-[var(--background)] text-[var(--foreground)] p-5 md:p-10">
+  <main class="mx-auto max-w-5xl space-y-10">
+
+    <header class="space-y-3 va-rise">
+      <p class="va-label">Decisión · cola para los webhooks de pagos</p>
+      <h1 class="va-title">Usar Redis Streams: ya está desplegado y aguanta 8× el pico actual</h1>
+      <p class="va-body max-w-2xl">Hoy los webhooks se procesan en línea y se pierden cuando el worker reinicia. Comparé tres colas
+        con el volumen real de la última semana (pico de 40 mensajes/s).</p>
+    </header>
+
+    <section class="grid gap-4 md:grid-cols-[1.4fr_1fr]">
+      <article class="va-panel verdict p-6 md:p-8 space-y-6 va-rise" style="--i:1">
+        <div class="flex flex-wrap items-center gap-3">
+          <span class="va-badge">Recomendada</span>
+          <span class="text-sm text-[var(--muted-foreground)]">Costo extra: <strong class="text-[var(--foreground)]">$0/mes</strong></span>
+        </div>
+        <h2 class="text-4xl font-bold tracking-tight">Redis Streams</h2>
+        <ul class="space-y-4">
+          <li class="reason">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 8.5l3 3 7-7"/></svg>
+            <p><strong>Sin infraestructura nueva.</strong> <span class="text-[var(--muted-foreground)]">Redis ya corre para las sesiones de chat.</span></p>
+          </li>
+          <li class="reason">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 8.5l3 3 7-7"/></svg>
+            <p><strong>Reintentos con consumer groups.</strong> <span class="text-[var(--muted-foreground)]">Un mensaje sin ACK vuelve a la cola tras 30 s.</span></p>
+          </li>
+          <li class="reason">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 8.5l3 3 7-7"/></svg>
+            <p><strong>Margen de sobra.</strong> <span class="text-[var(--muted-foreground)]">Probado a 320 mensajes/s en staging.</span></p>
+          </li>
+        </ul>
+      </article>
+
+      <aside class="space-y-4 va-rise" style="--i:2">
+        <p class="va-label">Cuándo cambiar de opción</p>
+        <div class="va-callout" style="--tone: var(--va-warn)">
+          <p class="font-semibold">Si Redis deja de tener persistencia AOF</p>
+          <p class="va-body text-sm">Un reinicio perdería la cola. Antes de adoptarla, confirmar <code class="font-mono text-[13px]">appendonly yes</code>.</p>
+        </div>
+        <div class="va-callout">
+          <p class="font-semibold">Si se pasa a varias regiones</p>
+          <p class="va-body text-sm">SQS replica sin esfuerzo operativo, y ahí su costo se justifica.</p>
+        </div>
+      </aside>
+    </section>
+
+    <section class="space-y-4 va-rise" style="--i:3">
+      <h2 class="font-semibold">Comparativa</h2>
+      <div class="overflow-x-auto">
+        <table class="matrix w-full min-w-[560px] text-sm">
+          <thead>
+            <tr class="va-label">
+              <th class="w-[28%]">Criterio</th>
+              <th class="pick text-[var(--foreground)]">Redis Streams</th>
+              <th>RabbitMQ</th>
+              <th>Amazon SQS</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="font-medium">Ya desplegado</td>
+              <td class="pick"><span class="score" data-score="3"></span>Sí</td>
+              <td><span class="score" data-score="1"></span>No</td>
+              <td><span class="score" data-score="1"></span>No</td>
+            </tr>
+            <tr>
+              <td class="font-medium">Garantía de entrega</td>
+              <td class="pick"><span class="score" data-score="2"></span>At-least-once con AOF</td>
+              <td><span class="score" data-score="3"></span>At-least-once, colas durables</td>
+              <td><span class="score" data-score="3"></span>At-least-once gestionado</td>
+            </tr>
+            <tr>
+              <td class="font-medium">Carga operativa</td>
+              <td class="pick"><span class="score" data-score="3"></span>Ninguna nueva</td>
+              <td><span class="score" data-score="1"></span>Cluster nuevo y monitoreo</td>
+              <td><span class="score" data-score="3"></span>Ninguna</td>
+            </tr>
+            <tr>
+              <td class="font-medium">Costo mensual</td>
+              <td class="pick"><span class="score" data-score="3"></span>$0</td>
+              <td><span class="score" data-score="2"></span>~$45 (VM)</td>
+              <td><span class="score" data-score="2"></span>~$12 + egress</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // Cada puntuación se dibuja como 3 bloques; el color lo pone el CSS según data-score.
+    document.querySelectorAll('.score').forEach(el => {
+      el.append(...Array.from({ length: 3 }, () => document.createElement('i')));
+      el.setAttribute('role', 'img');
+      el.setAttribute('aria-label', `${el.dataset.score} de 3`);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<!-- dirección: widget inline explicativo · acento: --primary para el nodo seleccionado y sus aristas ·
+     elemento dominante: el diagrama · densidad: compacta (cabe en los 500px del embed inline)
+     EJEMPLO DE REFERENCIA: los datos son sintéticos. Sustitúyelos siempre por datos reales. -->
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    .va {
+      --va-ok: oklch(74% 0.15 155); --va-warn: oklch(80% 0.15 75);
+      --va-hairline: color-mix(in srgb, var(--border) 70%, transparent);
+      --va-shadow: 0 1px 2px rgb(0 0 0 / .25), 0 12px 32px -16px rgb(0 0 0 / .55);
+    }
+    html.light .va {
+      --va-ok: oklch(52% 0.14 155); --va-warn: oklch(58% 0.15 65);
+      --va-shadow: 0 1px 2px rgb(15 23 42 / .06), 0 12px 32px -18px rgb(15 23 42 / .25);
+    }
+    .va-label { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted-foreground); }
+
+    .node { cursor: pointer; outline: none; }
+    .node rect { fill: var(--card); stroke: var(--border); transition: stroke .15s, fill .15s; }
+    .node:hover rect { stroke: var(--muted-foreground); }
+    .node:focus-visible rect { stroke: var(--primary); stroke-dasharray: 4 3; }
+    .node.is-focus rect { stroke: var(--primary); stroke-width: 2; fill: color-mix(in oklch, var(--primary) 9%, var(--card)); }
+    .node .t { font-size: 14px; font-weight: 600; fill: var(--foreground); }
+    .node .s { font-size: 12px; fill: var(--muted-foreground); }
+    .edge { fill: none; stroke: color-mix(in srgb, var(--muted-foreground) 55%, transparent); stroke-width: 1.5; transition: stroke .15s; }
+    .edge.is-focus { stroke: var(--primary); stroke-width: 2; }
+    .edge-label { font-size: 12px; fill: var(--muted-foreground); }
+    .detail { transition: opacity .15s; }
+    @media (prefers-reduced-motion: reduce) { .node rect, .edge, .detail { transition: none; } }
+  </style>
+</head>
+<body class="va bg-transparent text-[var(--foreground)] antialiased p-4">
+  <div class="bg-[var(--card)] border border-[var(--va-hairline)] rounded-2xl p-5 space-y-4" style="box-shadow: var(--va-shadow)">
+    <div class="flex flex-wrap items-baseline justify-between gap-2">
+      <h2 class="font-semibold">Cómo responde una búsqueda con cache</h2>
+      <p class="text-xs text-[var(--muted-foreground)]">Toca un nodo para ver qué hace</p>
+    </div>
+
+    <div class="overflow-x-auto -mx-1 px-1">
+      <svg viewBox="0 0 640 172" class="w-full" style="min-width: 520px" role="group" aria-label="Diagrama del flujo de búsqueda">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" style="fill: context-stroke"/>
+          </marker>
+        </defs>
+
+        <path class="edge" data-link="cliente api" d="M140,86 H186" marker-end="url(#arrow)"/>
+        <path class="edge" data-link="api cache" d="M310,86 H340 V36 H416" marker-end="url(#arrow)"/>
+        <path class="edge" data-link="api proveedor" d="M310,86 H340 V136 H416" marker-end="url(#arrow)"/>
+        <path class="edge" data-link="proveedor cache" d="M495,110 V66" marker-end="url(#arrow)"/>
+        <text class="edge-label" x="378" y="27" text-anchor="middle">hit 71%</text>
+        <text class="edge-label" x="378" y="156" text-anchor="middle">miss 29%</text>
+        <text class="edge-label" x="503" y="92">guarda · TTL 10 min</text>
+
+        <g class="node" data-id="cliente" tabindex="0" role="button" aria-label="Cliente">
+          <rect x="10" y="60" width="130" height="52" rx="10"/>
+          <text class="t" x="75" y="82" text-anchor="middle">Cliente</text>
+          <text class="s" x="75" y="100" text-anchor="middle">GET /search</text>
+        </g>
+        <g class="node" data-id="api" tabindex="0" role="button" aria-label="API">
+          <rect x="190" y="60" width="120" height="52" rx="10"/>
+          <text class="t" x="250" y="82" text-anchor="middle">API</text>
+          <text class="s" x="250" y="100" text-anchor="middle">arma la clave</text>
+        </g>
+        <g class="node" data-id="cache" tabindex="0" role="button" aria-label="Cache">
+          <rect x="420" y="10" width="150" height="52" rx="10"/>
+          <text class="t" x="495" y="32" text-anchor="middle">Cache</text>
+          <text class="s" x="495" y="50" text-anchor="middle">Redis · 4 ms</text>
+        </g>
+        <g class="node" data-id="proveedor" tabindex="0" role="button" aria-label="Proveedor">
+          <rect x="420" y="110" width="150" height="52" rx="10"/>
+          <text class="t" x="495" y="132" text-anchor="middle">Proveedor</text>
+          <text class="s" x="495" y="150" text-anchor="middle">GDS · 600 ms</text>
+        </g>
+      </svg>
+    </div>
+
+    <div class="detail rounded-xl bg-[var(--background)] border border-[var(--va-hairline)] p-4" aria-live="polite">
+      <p class="va-label" id="detail-label"></p>
+      <p class="mt-1 text-sm leading-relaxed" id="detail-text"></p>
+    </div>
+  </div>
+
+  <script>
+    const DETAILS = {
+      cliente:   ['Cliente', 'Envía origen, destino y fechas. No sabe si la respuesta viene del cache: el contrato es el mismo.'],
+      api:       ['API', 'Normaliza la búsqueda (ciudades en IATA, fechas ISO) y arma la clave del cache. Si no la normalizara, "BOG" y "Bogotá" serían dos claves distintas.'],
+      cache:     ['Cache', 'Si la clave existe, responde en ~4 ms. Resuelve 71% de las búsquedas porque los usuarios repiten rutas populares.'],
+      proveedor: ['Proveedor', 'Solo se consulta en un miss. Tarda ~600 ms y cuesta por llamada; la respuesta se guarda 10 minutos para la siguiente búsqueda igual.'],
+    };
+    const nodes = [...document.querySelectorAll('.node')];
+    const edges = [...document.querySelectorAll('.edge')];
+    const label = document.getElementById('detail-label');
+    const text = document.getElementById('detail-text');
+
+    const select = id => {
+      nodes.forEach(n => {
+        const on = n.dataset.id === id;
+        n.classList.toggle('is-focus', on);
+        n.setAttribute('aria-pressed', on);
+      });
+      edges.forEach(e => e.classList.toggle('is-focus', e.dataset.link.split(' ').includes(id)));
+      [label.textContent, text.textContent] = DETAILS[id];
+    };
+
+    nodes.forEach(n => {
+      n.addEventListener('click', () => select(n.dataset.id));
+      n.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select(n.dataset.id); }
+      });
+    });
+    select('api');
+  </script>
+</body>
+</html>
